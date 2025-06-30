@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>How Much Is Too Much?</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 20px;
+      font-family: sans-serif;
+      background-color: #111;
+      color: #f5f5f5;
+      background-image: url('https://i.imgur.com/hHEyaW1.png'); /* Czaszki */
+      background-size: cover;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background-color: rgba(0,0,0,0.7);
+      padding: 30px;
+      border-radius: 12px;
+    }
+    h1 {
+      text-align: center;
+      margin-bottom: 25px;
+    }
+    label, select, input {
+      display: block;
+      margin-bottom: 15px;
+      width: 100%;
+    }
+    button {
+      padding: 10px;
+      background: #333;
+      color: white;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      font-size: 16px;
+    }
+    .result {
+      margin-top: 20px;
+      font-size: 18px;
+      font-weight: bold;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>How Much Is Too Much?</h1>
+
+    <label for="weight">Enter your weight:</label>
+    <input type="number" id="weight" placeholder="e.g. 70">
+
+    <label for="unit">Select unit:</label>
+    <select id="unit">
+      <option value="kg">Kilograms (kg)</option>
+      <option value="lbs">Pounds (lbs)</option>
+    </select>
+
+    <label for="age">Enter your age:</label>
+    <input type="number" id="age" placeholder="e.g. 25">
+
+    <label for="substance">Choose a substance:</label>
+    <select id="substance">
+      <!-- Opcje dodane przez JS -->
+    </select>
+
+    <button onclick="calculate()">Calculate Lethal Dose</button>
+
+    <div class="result" id="result"></div>
+  </div>
+
+  <script>
+    const substances = [
+      { name: "Caffeine", dose: 150 }, { name: "Nicotine", dose: 1 }, { name: "Alcohol (ethanol)", dose: 7060 },
+      { name: "Paracetamol", dose: 338 }, { name: "Ibuprofen", dose: 636 }, { name: "Aspirin", dose: 200 },
+      { name: "Sodium (salt)", dose: 3000 }, { name: "Sugar", dose: 30000 }, { name: "Cyanide", dose: 1.5 },
+      { name: "Arsenic", dose: 13 }, { name: "Morphine", dose: 200 }, { name: "Codeine", dose: 800 },
+      { name: "Heroin", dose: 50 }, { name: "Cocaine", dose: 95 }, { name: "THC (Cannabis)", dose: 800 },
+      { name: "MDMA", dose: 100 }, { name: "LSD", dose: 12 }, { name: "Methamphetamine", dose: 5 },
+      { name: "Hydrogen Cyanide", dose: 1.1 }, { name: "Carbon Monoxide", dose: 1400 },
+      { name: "Ammonia", dose: 350 }, { name: "Bleach", dose: 192 }, { name: "Acetone", dose: 5800 },
+      { name: "Benzene", dose: 930 }, { name: "Formaldehyde", dose: 100 }, { name: "Chloroform", dose: 695 },
+      { name: "Methanol", dose: 5628 }, { name: "Ethylene Glycol", dose: 4700 }, { name: "Antifreeze", dose: 4700 },
+      { name: "Lead", dose: 1000 }, { name: "Mercury", dose: 1 }, { name: "Zinc", dose: 500 },
+      { name: "Iron", dose: 200 }, { name: "Copper", dose: 340 }, { name: "Aluminum", dose: 5000 },
+      { name: "Silicon", dose: 3160 }, { name: "Phosphorus", dose: 3 }, { name: "Chlorine Gas", dose: 293 },
+      { name: "Toluene", dose: 636 }, { name: "Turpentine", dose: 576 }, { name: "Diesel", dose: 16000 },
+      { name: "Gasoline", dose: 5000 }, { name: "Motor Oil", dose: 5000 }, { name: "Hydrogen Peroxide", dose: 801 },
+      { name: "Vinegar (Acetic Acid)", dose: 3310 }, { name: "Baking Soda", dose: 4220 }, { name: "Ricin", dose: 0.002 },
+      { name: "Botulinum toxin", dose: 0.00001 }, { name: "Strychnine", dose: 1 }, { name: "VX Nerve Agent", dose: 0.01 },
+      { name: "Plutonium", dose: 0.0001 }, { name: "Polonium-210", dose: 0.0000001 }, { name: "Fentanyl", dose: 3 },
+      { name: "Carfentanil", dose: 0.001 }, { name: "Acetaminophen", dose: 338 }, { name: "Ibogaine", dose: 50 },
+      { name: "Psilocybin", dose: 280 }, { name: "DMT", dose: 40 }, { name: "Ketamine", dose: 600 },
+      { name: "Xylazine", dose: 100 }, { name: "Albuterol", dose: 680 }, { name: "Tramadol", dose: 300 },
+      { name: "Oxycodone", dose: 93 }, { name: "Hydrocodone", dose: 90 }, { name: "Diphenhydramine", dose: 500 },
+      { name: "Doxylamine", dose: 200 }, { name: "Citalopram", dose: 4000 }, { name: "Fluoxetine", dose: 1000 },
+      { name: "Venlafaxine", dose: 330 }, { name: "Duloxetine", dose: 470 }, { name: "Zolpidem", dose: 800 },
+      { name: "Lorazepam", dose: 1500 }, { name: "Diazepam", dose: 1240 }, { name: "Mirtazapine", dose: 830 },
+      { name: "Trazodone", dose: 610 }, { name: "Bupropion", dose: 450 }, { name: "Sertraline", dose: 700 }
+      // Możesz dodać więcej, jeśli chcesz
+    ];
+
+    const select = document.getElementById('substance');
+    substances.forEach(s => {
+      const opt = document.createElement("option");
+      opt.value = s.name;
+      opt.textContent = s.name;
+      select.appendChild(opt);
+    });
+
+    function calculate() {
+      const weight = parseFloat(document.getElementById('weight').value);
+      const unit = document.getElementById('unit').value;
+      const substance = document.getElementById('substance').value;
+      const age = parseInt(document.getElementById('age').value);
+      const data = substances.find(s => s.name === substance);
+
+      if (isNaN(weight) || isNaN(age)) {
+        document.getElementById("result").textContent = "Please enter valid weight and age.";
+        return;
+      }
+
+      const kg = unit === "lbs" ? weight * 0.453592 : weight;
+      const lethalMg = data.dose * kg;
+      const lethalG = lethalMg / 1000;
+
+      document.getElementById("result").textContent =
+        `At ${weight}${unit}, a dose of approximately ${lethalG.toFixed(2)} grams of ${substance} could be lethal.`;
+    }
+  </script>
+</body>
+</html>
